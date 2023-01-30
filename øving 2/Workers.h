@@ -1,5 +1,5 @@
 #include <functional>
-#include <queue>
+#include <list>
 #include <vector>
 #include <thread>
 #include <condition_variable>
@@ -7,7 +7,7 @@
 #include <atomic>
 
 class Workers {
-    std::queue<std::function<void()>> tasks;
+    std::list<std::function<void()>> tasks;
     std::vector<std::thread> threads;
     std::condition_variable tasks_cv;
     std::condition_variable finished_cv;

@@ -4,7 +4,7 @@
 //constructor for the Workers class
 Workers::Workers(int threadnum) {
     this->threadnum = threadnum;
-    tasks = std::queue<std::function<void()>>();
+    tasks = std::list<std::function<void()>>();
     threads = std::vector<std::thread>(threadnum);
     should_stop = false;
 }
@@ -13,20 +13,24 @@ Workers::Workers(int threadnum) {
 void Workers::post(std::function<void()> task) {
     {
         std::unique_lock<std::mutex> lock(tasks_mutex);
-        tasks.push(task);
+        tasks.emplace_back(task);
     }
     tasks_cv.notify_one();
 }
 
-//doesn't work: need to implement the time delays differently
-//method to add a task to a queue of tasks after a given time delay (milliseconds)
+//method to delay the task by a given amount of milliseconds
+void task_time_delay(std::function<void()> task, int ms) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms)); 
+    task();
+}
+
+//method to run tasks using a time delay
 void Workers::post_timeout(std::function<void()> task, int waiting_time) {
+    std::function<void()> func = bind(task_time_delay, task, waiting_time); 
     {
-        std::unique_lock<std::mutex> lock(tasks_mutex);
-        tasks.push(task);
+        std::lock_guard<std::mutex> lock(this->tasks_mutex);
+        this->tasks.emplace_back(func); 
     }
-    usleep(waiting_time);
-    tasks_cv.notify_one();
 }
 
 //method to initialize threads that are waiting, until they are given a task
@@ -47,7 +51,7 @@ void Workers::start() {
                     }
 
                     task = tasks.front(); //copy task for later use
-                    tasks.pop();          //remove task from queue
+                    tasks.pop_front();          //remove task from queue
                 }
 
                 if (task)

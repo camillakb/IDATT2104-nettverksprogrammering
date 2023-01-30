@@ -5,8 +5,8 @@ int main(int argc, char const *argv[])
 {
     Workers worker_threads(4);
     Workers event_loop(1);
-    worker_threads.start(); // Create 4 internal threads
-    event_loop.start(); // Create 1 internal thread
+    worker_threads.start(); //create 4 internal threads
+    event_loop.start(); //create 1 internal thread
 
     worker_threads.post([] {
         std::cout << "Task 1" << std::endl;
@@ -24,16 +24,19 @@ int main(int argc, char const *argv[])
         std::cout << "Task 4" << std::endl;
     });
 
-    //the task with the shortest time delay should always finish before the other
+    //tasks with time delays
     event_loop.post_timeout([] { 
         std::cout << "Task 5" << std::endl;
-    }, 3000);
+    }, 0);
 
     event_loop.post_timeout([] {
         std::cout << "Task 6" << std::endl;
     }, 2000);
 
-    worker_threads.join(); // Calls join() on the worker threads
-    event_loop.join(); // Calls join() on the event thread
+    //using sleep to be able to see all the prints before the program is finished running
+    std::this_thread::sleep_for(std::chrono::milliseconds(4000));
+
+    worker_threads.join(); //calls join() on the worker threads
+    event_loop.join(); //calls join() on the event thread
     return 0;
 }
