@@ -27,23 +27,6 @@ class Calculation {
     };
 }
 
-class SimpleWebServer { // class for the web server
-    static Function<String, String> respond = (request) -> {
-
-        String response = "HTTP/1.0 200 OK\n";
-        response += "Content-Type: text/html; charset=utf-8 \n";
-        response += "\n";
-        response += "<HTML><BODY>";
-        response += "<H1> Welcome to this simple web server </h1>";
-        response += "<UL>";
-
-        response += request.lines().reduce("", (String list, String line) -> list + "<li>" + line + "</li>");
-        response += "</UL> </BODY> </HTML>";
-
-        return response;
-    };
-}
-
 class TCPWorkerThread extends Thread {
     private Socket connection;
     private BufferedReader reader;
