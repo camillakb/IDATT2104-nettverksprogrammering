@@ -1,13 +1,14 @@
 const http = require("http");
 const fs = require("fs").promises;
 const host = "localhost";
-const port = "8000"; //Dobbeltsjekk at dette blir riktig
+const port = "8000"; 
 
 let index_file;
 const requestListener = (req, res) => {
   console.info("Fikk en forespørsel!!!!!");
   console.info(req.method);
   console.info(req.url);
+
   if (req.method === "GET") {
     switch (req.url) {
       case "/":
@@ -18,24 +19,38 @@ const requestListener = (req, res) => {
       default:
         error(res, 404, "Resource not found");
     }
+
   } else if (req.method === "POST") {
     res.setHeader("Content-Type", "application/json");
+
     switch (req.url) {
       case "/api":
         let body = "";
         req.on("data", (chunk) => (body += chunk.toString()));
         req.on("end", () => {
           const code = JSON.parse(body).code;
+
           if (code !== undefined) {
             writeToFile(code);
             const { exec } = require("child_process");
+            
             exec('docker build "compiler" -t compiler', (cmd, buildLog, buildError) => {
-              console.log(buildError);
+              if (cmd !== null) {
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
+                res.setHeader('Access-Control-Allow-Headers', 'content-type');
+                res.writeHead(400).end(
+                  JSON.stringify({ result: `Compilation failed` })
+                );
+                return;
+              }
+
               exec("docker run compiler", (cmd, runOutput, runError) => {
+                
                 if (!runError.trim() === "") {
                   error(res, 400, runError);
+                
                 } else {
-
                   res.setHeader('Access-Control-Allow-Origin', '*');
                   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
                   res.setHeader('Access-Control-Allow-Headers', 'content-type');
@@ -44,12 +59,16 @@ const requestListener = (req, res) => {
                   );
                 }
               });
+
             });
+
           } else {
             error(res, 400, "Could not find the code input");
           }
         });
+
         break;
+        
       default:
         error(res, 404, "Resource not found");
     }
@@ -57,7 +76,7 @@ const requestListener = (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
     res.setHeader('Access-Control-Allow-Headers', 'content-type');
-    res.setHeader('Access-Control-Max-Age', 2592000); // 30 days
+    res.setHeader('Access-Control-Max-Age', 2592000); //30 days
     res.statusCode = 204;
     res.end();
   }

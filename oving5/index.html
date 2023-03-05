@@ -98,30 +98,32 @@ int main()
     <script>
       const info = document.getElementById("info");
       const outputArea = document.getElementById("outputArea");
+      
       const submitForm = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const formObject = Object.fromEntries(formData);
         setInfo("Compiling...");
+
         try {
           const response = await fetch("http://127.0.0.1:8000/api", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ code: formObject.inputArea }),
           });
-          if (!response.ok) {
-            const data = await response.json();
-            throw Error(data.error);
-          }
+
           const data = await response.json();
           setInfo("");
           outputArea.value = data.result;
+        
         } catch (error) {
           setInfo("Something went wrong.");
           outputArea.value = error;
         }
+
         setTimeout(() => setInfo(""), 5000);
       };
+
       const setInfo = (text) => (info.innerHTML = text);
     </script>
   </body>
