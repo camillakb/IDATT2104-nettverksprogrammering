@@ -5,7 +5,7 @@ const port = "8000";
 
 let index_file;
 const requestListener = (req, res) => {
-  console.info("Fikk en forespørsel!!!!!");
+  console.info("Received a request!");
   console.info(req.method);
   console.info(req.url);
 
