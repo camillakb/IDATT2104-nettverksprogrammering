@@ -1,7 +1,7 @@
 const net = require('net');
 const crypto = require('crypto');
 
-// Simple HTTP server responds with a simple WebSocket client test
+//simple HTTP server responds with a simple WebSocket client test
 const httpServer = net.createServer((connection) => {
   connection.on('data', () => {
     let content = `<!DOCTYPE html>
@@ -26,16 +26,19 @@ httpServer.listen(3000, () => {
   console.log('HTTP server listening on port 3000');
 });
 
-// Incomplete WebSocket server
+//websocket server
 const wsServer = net.createServer((connection) => {
   console.log('Client connected');
 
   connection.on('data', (data) => {
+
     if (data.toString().startsWith("GET / HTTP/1.1")) {
+      //gets the websocket key, concat sequence and hash with sha1
       const key = data.toString().split("\r\n").filter((line) => { return line.startsWith("Sec-WebSocket-Key"); })[0].split(": ")[1];
       const hasher = crypto.createHash("sha1");
       const full_key = key.concat("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
       hasher.update(full_key);
+      //decrypt and find base64 value
       const reply_key = hasher.digest().toString("base64");
 
       const handshake = `HTTP/1.1 101 Switching Protocols
@@ -45,7 +48,6 @@ Sec-WebSocket-Accept: ${reply_key}
 
 `;
       connection.write(handshake);
-    
     }
 
     if (data.at(0) !== 0x81) {
@@ -85,6 +87,7 @@ Sec-WebSocket-Accept: ${reply_key}
 wsServer.on('error', (error) => {
   console.error('Error: ', error);
 });
+
 wsServer.listen(3001, () => {
   console.log('WebSocket server listening on port 3001');
 });
