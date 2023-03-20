@@ -19,13 +19,16 @@ public class JavaSSLClient {
         
         SSLSocketFactory sslSocketFactory = 
                 (SSLSocketFactory)SSLSocketFactory.getDefault();
+
         try {
             Socket socket = sslSocketFactory.createSocket("localhost", port);
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
             try (BufferedReader bufferedReader = 
                     new BufferedReader(
                             new InputStreamReader(socket.getInputStream()))) {
                 Scanner scanner = new Scanner(System.in);
+                
                 while(true){
                     System.out.println("Enter something:");
                     String inputLine = scanner.nextLine();
@@ -46,5 +49,3 @@ public class JavaSSLClient {
     }
     
 }
-
-// java.exe -Djavax.net.ssl.trustStore=oving4store -Djavax.net.ssl.trustStorePassword=oving4store JavaSSLClient

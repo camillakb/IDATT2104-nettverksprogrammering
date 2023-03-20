@@ -35,6 +35,7 @@ public class JavaSSLServer {
                     new BufferedReader(
                             new InputStreamReader(socket.getInputStream()))) {
                 String line;
+
                 while((line = bufferedReader.readLine()) != null){
                     System.out.println(line);
                     out.println(line);
@@ -46,8 +47,7 @@ public class JavaSSLServer {
             Logger.getLogger(JavaSSLServer.class.getName())
                     .log(Level.SEVERE, null, ex);
         }
+        
     }
     
 }
-
-//java.exe -Djavax.net.ssl.keyStore=oving4store -Djavax.net.ssl.keyStorePassword=oving4store JavaSSLServer
